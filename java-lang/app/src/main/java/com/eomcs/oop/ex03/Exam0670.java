@@ -15,6 +15,7 @@ public class Exam0670 {
     //    static {
     //      a = 100;
     //    }
+
     // - 바이트 코드(Exam0670$A.class)를 확인해 보라!
   }
 
