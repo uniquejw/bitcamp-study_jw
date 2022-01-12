@@ -23,7 +23,7 @@ public class Exam0720 {
     // 생성자가 있으면,
     // - 존재하는 생성자의 앞 부분에 삽입된다.
     // - 바이트코드(Exam0720$A.class)를 확인해 보라!
-    public ㅋA() {
+    public A() {
       a = 200;
       System.out.println("A() 생성자 호출");
     }
