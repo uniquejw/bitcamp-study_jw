@@ -1,44 +1,116 @@
-# 10.1 데이터 관리를 DBMS에게 맡기기 : JDBC API 사용
+# 11.1 DB 프로그래밍을 더 쉽고 간단히 하는 방법 : Mybatis 퍼시스턴스 프레임워크 도입
 
-- DBMS를 사용하여 데이터를 저장하고 조회하기
+- JDBC 코드를 캡슐화한 Mybatis 퍼시스턴스 프레임워크 사용하기
 
 ## 백엔드 개발 실습
 
-### 1단계 - 프로젝트에 JDBC Driver 추가한다.
+### 1단계 - 프로젝트에 MyBatis 라이브러리를 추가한다.
 
-- 그래이들 빌드 스크립트 파일(build.gradle) 변경
-  - mariadb jdbc driver 추가
-  - `$ gradle eclipse` 실행
-  - 이클립스 IDE에서 프로젝트 정보 갱신
+- build.gradle   
+  - `search.maven.org` 사이트에서 *mybatis* 라이브러리 정보를 찾는다.
+    - 직접 구성
+      - `implementation 'org.mybatis:mybatis:3.5.9'`
+      - `implementation 'org.mybatis:mybatis-spring:2.0.7'`
+    - Spring Boot 구성
+      - `implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'`
+  - 의존 라이브러리 블록에서 `mybatis` 라이브러리를 등록한다.
+- gradle을 이용하여 eclipse 설정 파일을 갱신한다.
+  - `$ gradle eclipse`
+- 이클립스에서 프로젝트를 갱신한다.
 
-### 2단계 - 게시글을 저장할 테이블 생성
+### 2단계 - DAO 구현체에 Mybatis 프레임워크를 적용한다.
 
-- mariadb 클라이언트를 사용하여 테이블을 생성한다.
-  - primary key 제약조건과 자동 증가 설정을 추가한다.
+- com.eomcs.mylist.dao.mariadb.BoarDaoImpl 클래스 변경
+  - SQL 코드를 뜯어내어 XML 파일로 옮긴다.
+    - /src/main/resources/com/eomcs/mylist/dao/BoardDao.xml
+- com.eomcs.mylist.App 클래스 변경
+  - SqlSessionFactory 객체 준비
 
+### 3단계 - DAO 구현체를 자동으로 생성한다.
+
+- com.eomcs.mylist.dao.mariadb.BoardDaoImpl 클래스 삭제
+- com.eomcs.mylist.dao.BoardDao 인터페이스 변경
+  - 애노테이션을 이용하여 Mybatis 관련 설정하기
+- com.eomcs.mylist.App 클래스 변경
+  - SqlSessionFactory 객체를 준비하는 메서드 제거
+
+### 4단계 - 레코드 값을 저장할 도메인 클래스의 별명을 설정한다.
+
+- src/main/resources/application.properties 파일 변경
+  - mybatis의 도메인 클래스의 별명 설정 추가
+- com/eomcs/mylist/dao/BoardDao.xml 파일 변경
+  - 도메인 클래스를 직접 사용하는 대신에 별명을 사용한다.
+  - <resultMap></resultMap> 태그를 이용하여 컬럼과 필드를 연결한다.
+
+
+### 5단계 - 자바 소스 파일과 설정 파일을 분리한다.
+
+- BoardDao.xml 파일을 src/main/resources 폴더로 옮긴다.
+
+
+### 6단계 - BoardDao에 Mybatis를 적용한다.
+
+- Book 데이터를 저장할 테이블을 생성한다.
 ```
-create table ml_board (
-    board_no int not null,
-    title varchar(255) not null,
-    content text not null,
-    created_date datetime default now(),
-    view_count int default 0
+create table ml_book(
+  book_no int not null,
+  title varchar(255) not null,
+  author varchar(100) not null,
+  press varchar(100) not null,
+  feed text not null,
+  read_date date,
+  page int,
+  price int
 );
 
-alter table ml_board
-  add constraint primary key(board_no);
-
-alter table ml_board
-  modify column board_no int not null auto_increment;
+alter table ml_book
+  add constraint primary key (book_no),
+  modify column book_no int not null auto_increment;
 ```
 
-### 3단계 - JdbcXxxDao 클래스를 생성한다.
+- com.eomcs.mylist.domain.Book 클래스 변경
+  - primary key 값을 저장할 no 필드를 추가한다.
 
-- JDBC Driver를 이용하여 MariaDB를 통해 데이터를 처리한다.
+- com.eomcs.mylist.dao.BookDao 인터페이스 변경
+  - 메서드의 파라미터 및 리턴 타입 변경
+  - Mybatis 설정 추가
+
+- com.eomcs.mylist.controller.BookController 클래스 변경
+  - 메서드 파라미터 및 DAO 호출 코드 변경
+
+
+### 7단계 - ContactDao에 Mybatis를 적용한다.
+
+- Contact 데이터를 저장할 테이블을 생성한다.
+```
+create table ml_contact(
+  contact_no int not null,
+  name varchar(50) not null,
+  tel varchar(50) not null,
+  email varchar(20) not null,
+  company varchar(50)
+);
+
+alter table ml_contact
+  add constraint primary key (contact_no),
+  modify column contact_no int not null auto_increment;
+```
+
+- com.eomcs.mylist.domain.Contact 클래스 변경
+  - primary key 값을 저장할 no 필드를 추가한다.
+
+- com.eomcs.mylist.dao.ContactDao 인터페이스 변경
+  - 메서드의 파라미터 및 리턴 타입 변경
+  - Mybatis 설정 추가
+
+- com.eomcs.mylist.controller.ContactController 클래스 변경
+  - 메서드 파라미터 및 DAO 호출 코드 변경
 
 
 ## 프론트엔드 개발 실습
 
+- 독서록 관련 UI 변경
+  - index.html, view.html
 
 
 

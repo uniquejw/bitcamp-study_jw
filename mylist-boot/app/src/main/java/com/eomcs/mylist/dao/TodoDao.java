@@ -1,12 +1,17 @@
 package com.eomcs.mylist.dao;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
 import com.eomcs.mylist.domain.Todo;
 
+@Mapper
 public interface TodoDao {
 
   int countAll();
 
-  Object[] findAll();
+  List<Todo> findAll();
 
   void insert(Todo todo) throws Exception;
 
